@@ -1,0 +1,43 @@
+# Environment variables
+.env
+.env.local
+*.env
+
+# Python virtual environment
+.venv/
+venv/
+env/
+ENV/
+
+# Python bytecode & cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyd
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Sensitive data directories
+data/raw/*
+!data/raw/.gitkeep
+data/processed/*
+!data/processed/.gitkeep
+data/annotated/*
+!data/annotated/.gitkeep
+data/predictions/*
+!data/predictions/.gitkeep
+
+# Models & Reports
+models/*
+!models/.gitkeep
+reports/*
+!reports/.gitkeep
+
+# IDE & OS
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+Thumbs.db
+Desktop.ini

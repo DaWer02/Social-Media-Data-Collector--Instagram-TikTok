@@ -1,0 +1,21 @@
+# Dependensi Inti Instagram Slang NLP CLI
+# (Tanpa torch / transformers untuk tahap baseline)
+
+# Konfigurasi & Lingkungan
+python-dotenv>=1.0.0
+
+# HTTP Client untuk API Adapter
+requests>=2.31.0
+
+# Pengolahan Data & Tabulasi
+pandas>=2.0.0
+
+# Machine Learning Baseline & Serialisasi Model
+scikit-learn>=1.3.0
+joblib>=1.3.0
+
+# Visualisasi Plot Analisis
+matplotlib>=3.7.0
+
+# Pengujian (Testing)
+pytest>=8.0.0
