@@ -51,11 +51,7 @@ class CollectorValidationError(CollectorError):
 
 @dataclass(frozen=True)
 class CommentRecord:
-    """Standardized representation of a single collected comment.
-
-    Note: Personal identifiers like username or user profile are strictly omitted
-    to adhere to research data minimization requirements.
-    """
+    """Standardized representation of a single collected comment."""
 
     comment_id: str
     media_id: str
@@ -64,12 +60,14 @@ class CommentRecord:
     like_count: int | None = 0
     collected_at: str = ""
     source_type: str = "authorized_api"
+    username: str = ""
 
     def to_dict(self) -> dict[str, Any]:
         """Convert record to dictionary for CSV or JSON storage."""
         return {
             "comment_id": self.comment_id,
             "media_id": self.media_id,
+            "username": self.username,
             "comment_text": self.comment_text,
             "timestamp": self.timestamp or "",
             "like_count": self.like_count if self.like_count is not None else 0,

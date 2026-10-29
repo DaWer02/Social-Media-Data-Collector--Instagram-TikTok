@@ -10,11 +10,12 @@ from __future__ import annotations
 
 import csv
 import re
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
 from src.config import ensure_directories
+from src.extractors.linguistic_classifier import classify_comment
 from src.storage import get_processed_filepath
 
 # Mandatory columns required in RAW dataset according to Data Dictionary
@@ -23,11 +24,15 @@ REQUIRED_RAW_COLUMNS: list[str] = ["comment_id", "media_id", "comment_text"]
 PROCESSED_FIELDNAMES: list[str] = [
     "comment_id",
     "media_id",
+    "username",
     "comment_text",
     "clean_text",
     "normalized_text",
     "is_empty_after_cleaning",
     "duplicate_status",
+    "bentuk_bahasa_gaul",
+    "fungsi_bahasa",
+    "kata_gaul",
 ]
 
 # Regex pattern for web URLs
@@ -54,20 +59,37 @@ class PreprocessingReport:
     total_duplicate: int
     total_final: int
     missing_columns: list[str]
+    slang_forms_counts: dict[str, int] = field(default_factory=dict)
+    language_functions_counts: dict[str, int] = field(default_factory=dict)
 
     def summary_text(self) -> str:
         """Format report into human-readable summary for terminal display."""
-        return (
-            "=" * 60 + "\n"
-            "RINGKASAN PREPROCESSING DATASET\n"
-            f"File Sumber RAW    : {self.raw_filepath.name}\n"
-            f"File Hasil Bersih  : {self.processed_filepath.name}\n"
-            f"Total Baris Awal   : {self.total_initial}\n"
-            f"Komentar Kosong    : {self.total_empty}\n"
-            f"Komentar Duplikat  : {self.total_duplicate}\n"
-            f"Total Baris Akhir  : {self.total_final} (unik & tidak kosong)\n"
-            + "=" * 60
-        )
+        lines = [
+            "=" * 64,
+            "RINGKASAN PREPROCESSING & PENGKATEGORIAN NLP",
+            "=" * 64,
+            f"File Sumber RAW    : {self.raw_filepath.name}",
+            f"File Hasil Bersih  : {self.processed_filepath.name}",
+            f"Total Baris Awal   : {self.total_initial}",
+            f"Komentar Kosong    : {self.total_empty}",
+            f"Komentar Duplikat  : {self.total_duplicate}",
+            f"Total Baris Akhir  : {self.total_final} (unik & tidak kosong)",
+        ]
+
+        if self.slang_forms_counts:
+            lines.append("-" * 64)
+            lines.append("DISTRIBUSI BENTUK BAHASA GAUL:")
+            for form, cnt in sorted(self.slang_forms_counts.items(), key=lambda x: x[1], reverse=True):
+                lines.append(f"  - {form.capitalize():<16}: {cnt} kemunculan")
+
+        if self.language_functions_counts:
+            lines.append("-" * 64)
+            lines.append("DISTRIBUSI FUNGSI BAHASA:")
+            for fn, cnt in sorted(self.language_functions_counts.items(), key=lambda x: x[1], reverse=True):
+                lines.append(f"  - {fn.capitalize():<16}: {cnt} kemunculan")
+
+        lines.append("=" * 64)
+        return "\n".join(lines)
 
 
 def clean_comment_text(text: str | None) -> str:
@@ -177,6 +199,8 @@ def preprocess_dataset_with_report(
     total_duplicate = 0
     seen_comment_ids: set[str] = set()
     rows_to_write: list[dict[str, Any]] = []
+    slang_forms_counts: dict[str, int] = {}
+    language_functions_counts: dict[str, int] = {}
 
     # Read RAW file in strict read-only mode
     with open(raw_csv_path, "r", encoding="utf-8") as infile:
@@ -187,6 +211,7 @@ def preprocess_dataset_with_report(
             cid = row.get("comment_id", "").strip()
             raw_text = row.get("comment_text", "")
             media_id = row.get("media_id", "").strip()
+            username = row.get("username", "").strip()
 
             clean_text = clean_comment_text(raw_text)
             norm_text = normalize_text_for_analysis(raw_text)
@@ -194,6 +219,9 @@ def preprocess_dataset_with_report(
 
             if is_empty:
                 total_empty += 1
+
+            # Multi-label linguistic categorization
+            cat_result = classify_comment(clean_text)
 
             # Deduplication logic by comment_id
             is_dup = False
@@ -204,15 +232,26 @@ def preprocess_dataset_with_report(
                 else:
                     seen_comment_ids.add(cid)
 
+            # Accumulate category distribution for usable comments
+            if not is_empty and not is_dup:
+                for form in cat_result.slang_forms:
+                    slang_forms_counts[form] = slang_forms_counts.get(form, 0) + 1
+                for fn in cat_result.language_functions:
+                    language_functions_counts[fn] = language_functions_counts.get(fn, 0) + 1
+
             rows_to_write.append(
                 {
                     "comment_id": cid,
                     "media_id": media_id,
+                    "username": username,
                     "comment_text": raw_text,  # Untouched original text
                     "clean_text": clean_text,
                     "normalized_text": norm_text,
                     "is_empty_after_cleaning": str(is_empty).lower(),
                     "duplicate_status": "duplicate" if is_dup else "unique",
+                    "bentuk_bahasa_gaul": cat_result.slang_forms_str,
+                    "fungsi_bahasa": cat_result.language_functions_str,
+                    "kata_gaul": cat_result.detected_words_str,
                 }
             )
 
@@ -236,6 +275,8 @@ def preprocess_dataset_with_report(
         total_duplicate=total_duplicate,
         total_final=total_final,
         missing_columns=[],
+        slang_forms_counts=slang_forms_counts,
+        language_functions_counts=language_functions_counts,
     )
 
 

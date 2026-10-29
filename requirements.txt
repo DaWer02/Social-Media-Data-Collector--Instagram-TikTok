@@ -7,6 +7,9 @@ python-dotenv>=1.0.0
 # HTTP Client untuk API Adapter
 requests>=2.31.0
 
+# Browser Automation & Dynamic Ingestion
+playwright>=1.40.0
+
 # Pengolahan Data & Tabulasi
 pandas>=2.0.0
 

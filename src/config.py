@@ -25,6 +25,7 @@ PREDICTIONS_DATA_DIR: Path = DATA_DIR / "predictions"
 MODELS_DIR: Path = BASE_DIR / "models"
 REPORTS_DIR: Path = BASE_DIR / "reports"
 DOCS_DIR: Path = BASE_DIR / "docs"
+BROWSER_PROFILE_DIR: Path = BASE_DIR / ".browser_profile"
 
 # Taxonomy Constants
 SLANG_FORMS: tuple[str, ...] = (
@@ -156,6 +157,19 @@ def validate_api_variant(variant: str | None) -> str:
     return cleaned
 
 
+def validate_collector_method(method: str | None) -> str:
+    """Validate collector method (browser_nlp or graph_api)."""
+    if not method or not str(method).strip():
+        return "browser_nlp"
+    cleaned = str(method).strip().lower()
+    if cleaned not in {"browser_nlp", "graph_api"}:
+        raise ConfigValidationError(
+            f"Metode koleksi '{method}' tidak didukung.",
+            safe_action="Gunakan 'browser_nlp' (default) atau 'graph_api' pada COLLECTOR_METHOD di .env.",
+        )
+    return cleaned
+
+
 def mask_token(token: str | None) -> str:
     """Return a safely redacted representation of a secret token.
 
@@ -197,6 +211,7 @@ class AppConfig:
     target_comments: int = 3000
     graph_api_version: str = "v21.0"
     api_variant: str = "facebook_login"
+    collector_method: str = "browser_nlp"
     app_env: str = "development"
     log_level: str = "INFO"
     raw_dir: Path = RAW_DATA_DIR
@@ -212,11 +227,13 @@ class AppConfig:
         self.target_comments = validate_target_comments(self.target_comments)
         self.graph_api_version = validate_graph_api_version(self.graph_api_version)
         self.api_variant = validate_api_variant(self.api_variant)
+        self.collector_method = validate_collector_method(self.collector_method)
 
     def __repr__(self) -> str:
         """Secure representation that masks sensitive tokens."""
         return (
             f"AppConfig("
+            f"collector_method='{self.collector_method}', "
             f"access_token={mask_token(self.access_token)}, "
             f"target_comments={self.target_comments}, "
             f"graph_api_version='{self.graph_api_version}', "
@@ -282,6 +299,7 @@ class AppConfig:
         token = os.getenv("INSTAGRAM_ACCESS_TOKEN", "").strip() or None
         api_version = os.getenv("GRAPH_API_VERSION", "v21.0").strip()
         api_variant = os.getenv("INSTAGRAM_API_VARIANT", "facebook_login").strip()
+        collector_method = os.getenv("COLLECTOR_METHOD", "browser_nlp").strip().lower()
 
         raw_target = os.getenv("TARGET_COMMENTS", "3000")
         target_comments = validate_target_comments(raw_target)
@@ -294,6 +312,7 @@ class AppConfig:
             target_comments=target_comments,
             graph_api_version=api_version,
             api_variant=api_variant,
+            collector_method=collector_method,
             app_env=app_env,
             log_level=log_level,
             raw_dir=RAW_DATA_DIR,

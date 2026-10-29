@@ -480,6 +480,51 @@ class TestAnnotations(unittest.TestCase):
         self.assertIn("Baris Bermasalah    : 1", summary)
         self.assertIn("review_status 'rusak' tidak valid", summary)
 
+    def test_prepopulated_suggestions_from_processed_categories(self) -> None:
+        """Verify linguistic categories from processed CSV are pre-populated as suggestions."""
+        processed_path = self.test_dir / "comments_clean_cat.csv"
+        self._create_csv(
+            processed_path,
+            fieldnames=[
+                "comment_id", "clean_text", "bentuk_bahasa_gaul", "fungsi_bahasa", "kata_gaul"
+            ],
+            rows=[
+                {
+                    "comment_id": "c901",
+                    "clean_text": "gws ya bro",
+                    "bentuk_bahasa_gaul": "singkatan;bahasa_asing",
+                    "fungsi_bahasa": "emotif",
+                    "kata_gaul": "gws;bro",
+                },
+                {
+                    "comment_id": "c902",
+                    "clean_text": "Selamat pagi semuanya",
+                    "bentuk_bahasa_gaul": "tidak_ada",
+                    "fungsi_bahasa": "emotif",
+                    "kata_gaul": "",
+                },
+            ],
+        )
+
+        output_path = self.test_dir / "annotated" / "comments_labeled_suggestions.csv"
+        generate_annotation_template(processed_path, output_csv_path=output_path)
+
+        with open(output_path, "r", encoding="utf-8") as f:
+            rows = list(csv.DictReader(f))
+
+        self.assertEqual(len(rows), 2)
+        # Row 1 has slang
+        self.assertEqual(rows[0]["slang_present"], "ya")
+        self.assertEqual(rows[0]["slang_forms"], "singkatan;bahasa_asing")
+        self.assertEqual(rows[0]["language_functions"], "emotif")
+        self.assertEqual(rows[0]["slang_spans"], "gws;bro")
+        self.assertEqual(rows[0]["review_status"], "belum")
+
+        # Row 2 has no slang
+        self.assertEqual(rows[1]["slang_present"], "tidak")
+        self.assertEqual(rows[1]["slang_forms"], "")
+        self.assertEqual(rows[1]["review_status"], "belum")
+
 
 if __name__ == "__main__":
     unittest.main()

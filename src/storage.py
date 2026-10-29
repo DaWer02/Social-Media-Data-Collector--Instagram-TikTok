@@ -21,6 +21,7 @@ from src.config import (
 RAW_FIELDNAMES: list[str] = [
     "comment_id",
     "media_id",
+    "username",
     "comment_text",
     "timestamp",
     "like_count",
@@ -116,6 +117,7 @@ def save_raw_comments(
                 row = {
                     "comment_id": str(comment.get("comment_id", "")),
                     "media_id": str(comment.get("media_id", "")),
+                    "username": str(comment.get("username", "")),
                     "comment_text": str(comment.get("comment_text", "")),
                     "timestamp": comment.get("timestamp") or "",
                     "like_count": comment.get("like_count", 0),

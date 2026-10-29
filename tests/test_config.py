@@ -10,6 +10,7 @@ from src.config import (
     mask_token,
     sanitize_headers,
     sanitize_url,
+    validate_collector_method,
     validate_graph_api_version,
     validate_target_comments,
 )
@@ -48,6 +49,16 @@ class TestConfigValidation(unittest.TestCase):
             validate_graph_api_version("21.0")
         with self.assertRaises(ConfigValidationError):
             validate_graph_api_version("version21")
+
+    def test_validate_collector_method(self) -> None:
+        """Valid collector methods should succeed or default."""
+        self.assertEqual(validate_collector_method("browser_nlp"), "browser_nlp")
+        self.assertEqual(validate_collector_method("graph_api"), "graph_api")
+        self.assertEqual(validate_collector_method(None), "browser_nlp")
+        self.assertEqual(validate_collector_method(""), "browser_nlp")
+
+        with self.assertRaises(ConfigValidationError):
+            validate_collector_method("invalid_method")
 
     def test_mask_token(self) -> None:
         """Verify token masking preserves confidentiality."""

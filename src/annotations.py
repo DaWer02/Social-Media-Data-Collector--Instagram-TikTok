@@ -178,15 +178,23 @@ def generate_annotation_template(
                     "adjudication_note": existing_row.get("adjudication_note", ""),
                 }
             else:
-                # Brand new record awaiting human annotation
+                # Brand new record: pre-populate with linguistic classifier suggestions if available
+                pre_forms = row.get("bentuk_bahasa_gaul", "").strip()
+                pre_func = row.get("fungsi_bahasa", "").strip()
+                pre_spans = row.get("kata_gaul", "").strip()
+                slang_present = (
+                    "ya" if (pre_forms and pre_forms != "tidak_ada")
+                    else ("tidak" if pre_forms == "tidak_ada" else "")
+                )
+
                 record = {
                     "comment_id": cid,
                     "clean_text": clean_text,
-                    "slang_present": "",
-                    "slang_forms": "",
-                    "slang_spans": "",
+                    "slang_present": slang_present,
+                    "slang_forms": pre_forms if pre_forms != "tidak_ada" else "",
+                    "slang_spans": pre_spans,
                     "slang_meanings": "",
-                    "language_functions": "",
+                    "language_functions": pre_func if pre_func != "tidak_jelas" else "",
                     "annotator_id": "",
                     "review_status": "belum",
                     "adjudication_note": "",

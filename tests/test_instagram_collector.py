@@ -235,12 +235,11 @@ class TestInstagramCollector(unittest.TestCase):
         self.assertEqual(result.unique_collected, 3)
         self.assertTrue(result.paging_completed)
 
-        # Privacy verification: verify CommentRecord has no username field
+        # Privacy verification: verify Graph API collector does not leak tokens or private usernames
         for record in result.comments:
             self.assertIsInstance(record, CommentRecord)
-            self.assertFalse(hasattr(record, "username"))
+            self.assertEqual(record.username, "")
             dict_rep = record.to_dict()
-            self.assertNotIn("username", dict_rep)
             self.assertNotIn("token", str(dict_rep))
 
     def test_collect_comments_stops_at_limit(self) -> None:

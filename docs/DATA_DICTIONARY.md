@@ -22,11 +22,15 @@ Nama file: `data/processed/comments_clean_<run_id>.csv`
 |---|---|---|
 | `comment_id` | string | ID unik komentar |
 | `media_id` | string | ID sumber untuk group split cross-validation |
+| `username` | string, opsional | Nama akun pembuat komentar |
 | `comment_text` | string | Teks asli, tidak diubah |
 | `clean_text` | string | Teks yang dibersihkan secara konservatif |
 | `normalized_text` | string, opsional | Teks normalisasi tanpa menggantikan teks asli |
 | `is_empty_after_cleaning` | boolean | Penanda teks kosong setelah preprocessing |
 | `duplicate_status` | string | Status deduplikasi berdasarkan `comment_id` |
+| `bentuk_bahasa_gaul` | string (multi-label `;`) | Kategori bentuk bahasa gaul (`akronim`, `singkatan`, `bahasa_asing`, `plesetan`, `pemendekan`, `tidak_ada`) |
+| `fungsi_bahasa` | string (multi-label `;`) | Kategori fungsi komunikatif bahasa (`emotif`, `referensial`, `konatif`, `tidak_jelas`) |
+| `kata_gaul` | string (multi-label `;`) | Kata/frasa bukti slang yang terdeteksi |
 
 ## 3. Annotated Dataset
 

@@ -198,11 +198,15 @@ class TestPreprocessingModule(unittest.TestCase):
         expected_fields = [
             "comment_id",
             "media_id",
+            "username",
             "comment_text",
             "clean_text",
             "normalized_text",
             "is_empty_after_cleaning",
             "duplicate_status",
+            "bentuk_bahasa_gaul",
+            "fungsi_bahasa",
+            "kata_gaul",
         ]
         self.assertEqual(list(row.keys()), expected_fields)
 
@@ -212,6 +216,60 @@ class TestPreprocessingModule(unittest.TestCase):
         self.assertEqual(row["clean_text"], "Ini Teks ASLI Dengan Huruf BESAR dan Spasi")
         # normalized_text is lowercased
         self.assertEqual(row["normalized_text"], "ini teks asli dengan huruf besar dan spasi")
+
+    def test_username_field_preservation(self) -> None:
+        """Verify username field from RAW CSV is correctly propagated into processed CSV."""
+        rows = [
+            {"comment_id": "c301", "media_id": "m1", "username": "anwar_ibrahim", "comment_text": "Hebat sekali!"},
+            {"comment_id": "c302", "media_id": "m1", "username": "rakyat_jelata", "comment_text": "Setuju bgt mantap"},
+        ]
+        self._create_raw_sample(rows, fieldnames=["comment_id", "media_id", "username", "comment_text"])
+
+        preprocess_raw_dataset(
+            raw_csv_path=self.raw_csv_path,
+            output_csv_path=self.processed_csv_path,
+        )
+
+        with open(self.processed_csv_path, "r", encoding="utf-8") as f:
+            reader = list(csv.DictReader(f))
+
+        self.assertEqual(len(reader), 2)
+        self.assertEqual(reader[0]["username"], "anwar_ibrahim")
+        self.assertEqual(reader[1]["username"], "rakyat_jelata")
+
+    def test_linguistic_categorization_in_preprocessing(self) -> None:
+        """Verify NLP categorization is performed directly during preprocessing with category statistics."""
+        rows = [
+            {"comment_id": "c401", "media_id": "m1", "comment_text": "Santuy bgt ngab, gokil abiss wkwk 🔥"},
+            {"comment_id": "c402", "media_id": "m1", "comment_text": "Tolong evaluasi kebijakan ini segera @prabowo"},
+            {"comment_id": "c403", "media_id": "m1", "comment_text": "Gaji minimum dinaikkan jadi RM2,000"},
+        ]
+        self._create_raw_sample(rows)
+
+        report = preprocess_dataset_with_report(
+            raw_csv_path=self.raw_csv_path,
+            output_csv_path=self.processed_csv_path,
+        )
+
+        with open(self.processed_csv_path, "r", encoding="utf-8") as f:
+            reader = list(csv.DictReader(f))
+
+        # Check Row 1: santuy, bgt, ngab, gokil, wkwk
+        self.assertIn("plesetan", reader[0]["bentuk_bahasa_gaul"])
+        self.assertIn("singkatan", reader[0]["bentuk_bahasa_gaul"])
+        self.assertIn("emotif", reader[0]["fungsi_bahasa"])
+        self.assertIn("santuy", reader[0]["kata_gaul"])
+
+        # Check Row 2: tolong, @prabowo
+        self.assertIn("konatif", reader[1]["fungsi_bahasa"])
+
+        # Check Row 3: gaji minimum, RM2,000
+        self.assertIn("referensial", reader[2]["fungsi_bahasa"])
+
+        # Check summary text mentions category distributions
+        summary = report.summary_text()
+        self.assertIn("DISTRIBUSI BENTUK BAHASA GAUL:", summary)
+        self.assertIn("DISTRIBUSI FUNGSI BAHASA:", summary)
 
 
 if __name__ == "__main__":

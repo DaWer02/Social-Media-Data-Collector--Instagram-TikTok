@@ -17,6 +17,7 @@ from src.collectors.base import (
     PermissionDeniedError,
     RateLimitError,
 )
+from src.collectors.browser_nlp import InstagramBrowserNLPCollector
 from src.collectors.instagram_api import InstagramGraphAPICollector
 from src.config import (
     RAW_DATA_DIR,
@@ -46,6 +47,7 @@ def print_banner(config: AppConfig) -> None:
     print("=" * 64)
     print(f" Lingkungan      : {config.app_env}")
     print(f" Target Default  : {config.target_comments} komentar")
+    print(f" Metode Koleksi  : {config.collector_method}")
     print(f" Versi Graph API : {config.graph_api_version}")
     print(f" Varian API      : {config.api_variant}")
     print(f" Access Token    : {mask_token(config.access_token)}")
@@ -78,8 +80,8 @@ def handle_collect_comments(
     Mandatory Workflow:
     1. Input URL or media ID.
     2. Input target comment count (default: 3000).
-    3. Validate configuration & API access.
-    4. Run collector.
+    3. Validate configuration & access.
+    4. Run collector (Browser NLP by default, or Graph API if configured).
     5. Save RAW comments (data/raw/comments_<run_id>.csv) - immutable.
     6. Save run metadata JSON (reports/run_<run_id>.json) without tokens.
     7. Display collection summary and RAW location.
@@ -88,13 +90,24 @@ def handle_collect_comments(
     10. If 'y' or 'yes': run preprocessing only. Training is NOT executed automatically.
     """
     print("\n--- [1] Kumpulkan Komentar Instagram ---")
-    print(InstagramGraphAPICollector.get_api_limitations())
+    if config.collector_method == "graph_api":
+        print(InstagramGraphAPICollector.get_api_limitations())
+    else:
+        print("[METODE AKTIF] Browser Automation (Playwright) + NLP Extractor")
+        print("  - Membuka browser langsung ke URL postingan publik Instagram.")
+        print("  - Sesi login tersimpan permanen di folder .browser_profile/.")
+        print("  - Ketik 'login' jika Anda ingin membuka browser untuk login akun terlebih dahulu.")
     print("-" * 64)
 
     try:
-        target_input = input_fn("Masukkan URL postingan atau Media ID Instagram: ").strip()
+        target_input = input_fn("Masukkan URL postingan atau ketik 'login': ").strip()
         if not target_input:
             print("[INFO] Pengumpulan dibatalkan (input kosong).")
+            return
+
+        if target_input.lower() == "login":
+            collector = InstagramBrowserNLPCollector(headless=False, input_fn=input_fn)
+            collector.open_interactive_login(input_fn=input_fn)
             return
 
         target_count_str = input_fn(
@@ -111,14 +124,32 @@ def handle_collect_comments(
 
         print(f"Target terpilih: {target_count} komentar untuk '{target_input}'")
 
-        # Resolve access token safely
-        if not config.access_token:
-            print("\nToken akses belum terkonfigurasi di environment/.env.")
-            token = config.get_or_prompt_access_token(prompt_fn=prompt_token_fn)
-            print(f"Token sesi berhasil disimpan di memori: {mask_token(token)}")
+        # Determine collector instance
+        active_method = config.collector_method
+        if collector_instance:
+            collector = collector_instance
+            token_used = config.access_token
+        elif active_method == "browser_nlp":
+            print("\n[INFO] Menggunakan mode Browser Automation (Playwright) + NLP Extractor.")
+            print("[INFO] Membuka jendela browser untuk memuat halaman dan membaca komentar...")
+            collector = InstagramBrowserNLPCollector(headless=False, input_fn=input_fn)
+            token_used = None
         else:
-            token = config.access_token
-            print(f"Menggunakan token terkonfigurasi: {mask_token(config.access_token)}")
+            # Resolve access token safely for Graph API
+            if not config.access_token:
+                print("\nToken akses belum terkonfigurasi di environment/.env.")
+                token = config.get_or_prompt_access_token(prompt_fn=prompt_token_fn)
+                print(f"Token sesi berhasil disimpan di memori: {mask_token(token)}")
+            else:
+                token = config.access_token
+                print(f"Menggunakan token terkonfigurasi: {mask_token(config.access_token)}")
+            token_used = token
+
+            collector = InstagramGraphAPICollector(
+                access_token=token_used,
+                api_version=config.graph_api_version,
+                api_variant=config.api_variant,
+            )
 
         run_id = generate_run_id()
         save_run_metadata(
@@ -127,19 +158,13 @@ def handle_collect_comments(
             extra_data={
                 "target_input": target_input,
                 "target_comments": target_count,
-                "api_variant": config.api_variant,
-                "api_version": config.graph_api_version,
+                "collector_method": active_method,
+                "api_variant": config.api_variant if active_method == "graph_api" else "n/a",
+                "api_version": config.graph_api_version if active_method == "graph_api" else "n/a",
             },
         )
 
-        # Initialize collector
-        collector = collector_instance or InstagramGraphAPICollector(
-            access_token=token,
-            api_version=config.graph_api_version,
-            api_variant=config.api_variant,
-        )
-
-        print(f"\nMemulai pengumpulan data via Meta Graph API ({config.api_variant})...")
+        print(f"\nMemulai pengumpulan data ({type(collector).__name__})...")
         result = collector.collect_comments(target=target_input, limit=target_count)
 
         # Handle empty collection safely
@@ -248,6 +273,7 @@ def handle_run_nlp_on_raw(
     preprocess_fn: Callable[[Path, str], Path] | None = None,
 ) -> None:
     """Handle menu option 2: Run preprocessing on existing RAW datasets."""
+    from src.config import RAW_DATA_DIR
     from src.preprocessing import PreprocessingValidationError, preprocess_dataset_with_report
 
     print("\n--- [2] Jalankan NLP pada RAW yang Sudah Ada ---")

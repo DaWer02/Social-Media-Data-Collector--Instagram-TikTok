@@ -175,14 +175,15 @@ class TestCLIInterface(unittest.TestCase):
         mock_collect: MagicMock,
         mock_from_env: MagicMock,
     ) -> None:
-        """Option 1 prompts for session token securely when not configured."""
+        """Option 1 prompts for session token securely when not configured in graph_api mode."""
         from src.collectors.base import CollectionResult
 
-        # Mock config with NO access token configured
+        # Mock config with NO access token configured and graph_api mode
         mock_from_env.return_value = AppConfig(
             access_token=None,
             target_comments=3000,
             graph_api_version="v21.0",
+            collector_method="graph_api",
         )
 
         mock_collect.return_value = CollectionResult(
@@ -215,6 +216,45 @@ class TestCLIInterface(unittest.TestCase):
         self.assertIn("Token sesi berhasil disimpan di memori", output)
         self.assertNotIn("SESSION_MOCK_TOKEN_XYZ12345", output)
         self.assertIn("SESS...2345", output)
+        mock_collect.assert_called_once()
+
+    @patch("src.cli.AppConfig.from_env")
+    @patch("src.collectors.browser_nlp.InstagramBrowserNLPCollector.collect_comments")
+    def test_run_cli_option_1_browser_nlp_flow(
+        self,
+        mock_collect: MagicMock,
+        mock_from_env: MagicMock,
+    ) -> None:
+        """Option 1 runs Browser NLP Collector by default without requiring access tokens."""
+        from src.collectors.base import CollectionResult
+
+        mock_from_env.return_value = AppConfig(
+            collector_method="browser_nlp",
+            target_comments=3000,
+        )
+
+        mock_collect.return_value = CollectionResult(
+            media_id="test1234",
+            comments=[],
+            total_collected=0,
+            unique_collected=0,
+            status="completed",
+        )
+
+        inputs = iter([
+            "1",                                       # Menu 1
+            "https://www.instagram.com/p/test1234/",  # Target URL
+            "500",                                     # Target comments
+            "0",                                       # Exit menu
+        ])
+
+        with patch("sys.stdout", new=io.StringIO()) as fake_out:
+            exit_code = run_cli(input_fn=lambda _: next(inputs))
+            output = fake_out.getvalue()
+
+        self.assertEqual(exit_code, 0)
+        self.assertIn("Browser Automation (Playwright) + NLP Extractor", output)
+        self.assertIn("Target terpilih: 500 komentar", output)
         mock_collect.assert_called_once()
 
 

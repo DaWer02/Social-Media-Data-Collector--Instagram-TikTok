@@ -10,10 +10,16 @@ CLI / main.py
     |
     +--> Input & Config Validator
     |
-    +--> Instagram Source Adapter
+    +--> Instagram Source Adapters (Pluggable BaseCollector)
     |       |
-    |       +--> Authorized API / permitted data source
-    |       +--> Pagination + rate-limit/error handling
+    |       +--> [Default] Browser Automation + NLP Extractor (src/collectors/browser_nlp.py)
+    |       |       - Membuka browser Playwright ke sembarang URL publik Instagram
+    |       |       - NLP Information Extraction: membersihkan noise UI (balas/suka/timestamp)
+    |       |       - In-flight quality: filter spam bot/iklan, deteksi bahasa & slang
+    |       |
+    |       +--> [Opsional] Meta Graph API Adapter (src/collectors/instagram_api.py)
+    |               - Resmi untuk postingan akun Business/Creator terotorisasi
+    |               - Pagination cursor + handling token & rate limit
     |
     +--> RAW Writer --------------------> data/raw/
     |       |
