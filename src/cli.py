@@ -64,6 +64,7 @@ def display_menu() -> None:
     print("  5. Latih model baseline")
     print("  6. Prediksi dataset")
     print("  7. Analisis hasil")
+    print("  8. REDAM.id - Pengumpulan dan penyiapan dataset")
     print("  0. Keluar")
     print("-" * 64)
 
@@ -637,7 +638,7 @@ def run_cli(
     while True:
         display_menu()
         try:
-            choice = input_fn("Pilih menu [0-7]: ").strip()
+            choice = input_fn("Pilih menu [0-8]: ").strip()
         except (KeyboardInterrupt, EOFError):
             print("\n\nOperasi dibatalkan oleh pengguna. Keluar dengan aman.")
             return 0
@@ -684,5 +685,8 @@ def run_cli(
                 config,
                 input_fn=input_fn,
             )
+        elif choice == "8":
+            from src.redam.menu import run_menu
+            run_menu(input_fn=input_fn, secret_fn=prompt_token_fn)
         else:
-            print(f"\n[PERINGATAN] Pilihan '{choice}' tidak valid. Silakan pilih nomor menu 0 sampai 7.")
+            print(f"\n[PERINGATAN] Pilihan '{choice}' tidak valid. Silakan pilih nomor menu 0 sampai 8.")

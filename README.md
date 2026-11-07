@@ -1,5 +1,11 @@
 # Instagram Slang NLP — Windows CLI Pipeline
 
+> Pipeline dataset REDAM.id tersedia melalui `py -3.11 -m src.redam`.
+> Menu interaktif: jalankan `py -3.11 main.py`, pilih **8. REDAM.id**, atau langsung `py -3.11 main.py --redam`.
+> PRD pengumpulan dataset: [docs/PRD_PENGUMPULAN_DATA_REDAM.md](docs/PRD_PENGUMPULAN_DATA_REDAM.md).
+> Lihat [panduan dataset](docs/REDAM_DATASET.md) dan [pedoman anotasi](docs/REDAM_ANNOTATION_GUIDE.md).
+> Pipeline ini menyiapkan kasus, evidence, anotasi manusia dan split riset; label slang lama tidak digunakan sebagai label koordinasi.
+
 <div align="center">
 
 ### Pipeline Pemrosesan Bahasa Alami (NLP) Berbasis CLI Windows untuk Analisis Bentuk Slang & Fungsi Bahasa Komentar Instagram
