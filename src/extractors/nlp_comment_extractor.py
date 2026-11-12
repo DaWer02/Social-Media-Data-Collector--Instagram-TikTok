@@ -29,7 +29,11 @@ RE_LIKE_COUNT = re.compile(
 )
 
 RE_REPLY_THREAD = re.compile(
-    r"^(?:lihat|view|sembunyikan|hide)\s+(?:\d+\s+)?(?:balasan|replies)(?:\s+lainnya)?",
+    r"^[―—\-\s]*(?:"
+    r"(?:lihat|view|sembunyikan|hide)\s+(?:semua\s+|all\s+|more\s+|previous\s+|hidden\s+|\d+\s+)*(?:more\s+)?(?:balasan|tanggapan|repl(?:y|ies))(?:\s+(?:lainnya|lagi|sebelumnya))?(?:\s*\(\d+\))?"
+    r"|(?:lihat|view)\s+\d+\s+lagi"
+    r"|[―—\-]{2,}"
+    r")$",
     re.IGNORECASE,
 )
 

@@ -307,6 +307,15 @@ def wait_for_user_login(
     return True
 
 
+def extract_clean_url(text: str) -> str:
+    """Extract clean HTTP/HTTPS URL from text (stripping share captions, account names, etc.)."""
+    match = re.search(r"https?://[^\s'\"<>]+", text)
+    if match:
+        url = match.group(0)
+        return url.rstrip(".,;:!?)")
+    return text.strip()
+
+
 def collect_browser_comments_to_csv(
     target_url: str,
     output_csv_path: Path | None = None,
@@ -316,12 +325,13 @@ def collect_browser_comments_to_csv(
     input_fn: Callable[[str], str] = input,
     sync_playwright_factory: Any | None = None,
     browser_profile_dir: Path | None = None,
+    include_usernames: bool = False,
 ) -> dict[str, Any]:
     """Buka browser Playwright, akses link, buka kolom komentar, baca semua, dan simpan ke file CSV."""
     from src.collectors.base import CommentRecord
     from src.config import BROWSER_PROFILE_DIR
 
-    clean_url = target_url.strip()
+    clean_url = extract_clean_url(target_url)
     platform = "tiktok" if "tiktok.com" in clean_url.lower() else "instagram"
     profile_dir = browser_profile_dir or BROWSER_PROFILE_DIR
     profile_dir.mkdir(parents=True, exist_ok=True)
@@ -343,6 +353,9 @@ def collect_browser_comments_to_csv(
         )
         case_id = res.media_id
         comments = res.comments
+        if not include_usernames:
+            for c in comments:
+                c.username = ""
 
     else:
         # TikTok collection via Playwright
@@ -431,7 +444,7 @@ def collect_browser_comments_to_csv(
                                 rec = CommentRecord(
                                     comment_id=f"tt_{cid}",
                                     media_id=case_id,
-                                    username=author,
+                                    username=author if include_usernames else "",
                                     comment_text=raw_t,
                                     timestamp=ts_str,
                                     like_count=int(likes) if str(likes).isdigit() else 0,
@@ -540,7 +553,7 @@ def collect_browser_comments_to_csv(
                         rec = CommentRecord(
                             comment_id=c_id,
                             media_id=case_id,
-                            username=item.get("author", ""),
+                            username=item.get("author", "") if include_usernames else "",
                             comment_text=t_clean,
                             timestamp=item.get("timestamp", ""),
                             like_count=0,
@@ -716,7 +729,7 @@ def collect_browser_comments_to_csv(
                 "columns": {
                     "comment_id": "comment_id",
                     "text": "comment_text",
-                    "account": "username",
+                    "account": "username" if include_usernames else None,
                     "created_at": "timestamp",
                     "likes_count": "like_count",
                 },

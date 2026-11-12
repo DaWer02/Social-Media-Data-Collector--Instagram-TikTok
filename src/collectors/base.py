@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Any
 
 
@@ -87,6 +87,12 @@ class CollectionResult:
     status: str
     error_message: str | None = None
     paging_completed: bool = False
+    reported_total: int | None = None
+    tolerance_target: int | None = None
+    raw_encountered: int = 0
+    filtered_out_count: int = 0
+    rejection_breakdown: dict[str, int] = field(default_factory=dict)
+    coverage_reached: bool = False
 
 
 class BaseCollector(ABC):

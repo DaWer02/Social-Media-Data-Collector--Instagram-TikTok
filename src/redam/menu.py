@@ -116,20 +116,23 @@ def run_menu(input_fn: Callable[[str], str] = input,
                     print(f"Laporan koleksi: {output / 'collection_report.json'}")
                 else:
                     # Direct URL collection with Playwright -> CSV (like Main Menu 1)
-                    target_url = raw_input
+                    from .collect import collect_browser_comments_to_csv, extract_clean_url
+                    target_url = extract_clean_url(raw_input)
+                    if target_url != raw_input.strip():
+                        print(f"[INFO] Tautan dibersihkan (nama akun/teks pembuka dilewati): {target_url}")
                     limit_str = input_fn("Target jumlah komentar [default: 300, tekan Enter untuk default]: ").strip()
                     limit = int(limit_str) if limit_str.isdigit() and int(limit_str) > 0 else 300
                     default_csv = root / "raw" / f"comments_{stamp}.csv"
                     csv_path = ask_path("Lokasi file CSV output", input_fn, default_csv)
                     if csv_path is None:
                         continue
-                    from .collect import collect_browser_comments_to_csv
                     result = collect_browser_comments_to_csv(
                         target_url=target_url,
                         output_csv_path=csv_path,
                         limit=limit,
                         headless=False,
                         input_fn=input_fn,
+                        include_usernames=False,
                     )
                     print("\n" + "=" * 64)
                     print("          PENGUMPULAN KOMENTAR SELESAI")

@@ -129,6 +129,26 @@ class TestNLPCommentExtractor(unittest.TestCase):
         self.assertFalse(res3.is_valid)
         self.assertEqual(res3.rejection_reason, "too_short")
 
+    def test_filter_expanded_view_more_replies_labels(self) -> None:
+        """Verify 'View more replies', 'View all X replies', and Indonesian variants are stripped."""
+        block = (
+            "budi_santoso\n"
+            "3h\n"
+            "Setuju banget sama pendapat ini!\n"
+            "2 likes\n"
+            "Reply\n"
+            "―― View more replies\n"
+            "― View 5 more replies\n"
+            "View all 12 replies\n"
+            "Lihat semua balasan\n"
+            "Lihat balasan lainnya\n"
+            "Hide replies"
+        )
+        extracted = self.extractor.extract_from_dom_text_block(block)
+        self.assertTrue(extracted.is_valid)
+        self.assertEqual(extracted.author, "budi_santoso")
+        self.assertEqual(extracted.comment_text, "Setuju banget sama pendapat ini!")
+
 
 if __name__ == "__main__":
     unittest.main()

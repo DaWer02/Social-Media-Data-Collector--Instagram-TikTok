@@ -168,6 +168,14 @@ def handle_collect_comments(
         print(f"\nMemulai pengumpulan data ({type(collector).__name__})...")
         result = collector.collect_comments(target=target_input, limit=target_count)
 
+        reported_total = result.reported_total if isinstance(getattr(result, "reported_total", None), int) else None
+        tolerance_target = result.tolerance_target if isinstance(getattr(result, "tolerance_target", None), int) else None
+        raw_encountered = result.raw_encountered if isinstance(getattr(result, "raw_encountered", None), int) else 0
+        filtered_out_count = result.filtered_out_count if isinstance(getattr(result, "filtered_out_count", None), int) else 0
+        raw_breakdown = getattr(result, "rejection_breakdown", None)
+        rejection_breakdown = dict(raw_breakdown) if isinstance(raw_breakdown, dict) else {}
+        coverage_reached = bool(getattr(result, "coverage_reached", False))
+
         # Handle empty collection safely
         if not result.comments or result.unique_collected == 0:
             update_run_metadata(
@@ -176,9 +184,19 @@ def handle_collect_comments(
                     "status": "empty_result",
                     "media_id": result.media_id,
                     "unique_collected": 0,
+                    "reported_total": reported_total,
+                    "tolerance_target": tolerance_target,
+                    "raw_encountered": raw_encountered,
+                    "filtered_out_count": filtered_out_count,
+                    "rejection_breakdown": rejection_breakdown,
+                    "coverage_reached": coverage_reached,
                 },
             )
-            print("\n[PERINGATAN] Tidak ada komentar yang berhasil diambil dari media ini.")
+            print("\n[PERINGATAN] Tidak ada komentar valid NLP yang berhasil diambil dari media ini.")
+            if filtered_out_count > 0:
+                print(
+                    f"[INFO] Terbaca {raw_encountered} komentar dari postingan, namun {filtered_out_count} ditolak filter kualitas NLP ({rejection_breakdown})."
+                )
             print("[INFO] Pengumpulan selesai tanpa data. Tahap NLP tidak dimulai.")
             return
 
@@ -193,6 +211,12 @@ def handle_collect_comments(
                 "media_id": result.media_id,
                 "total_collected": result.total_collected,
                 "unique_collected": result.unique_collected,
+                "reported_total": reported_total,
+                "tolerance_target": tolerance_target,
+                "raw_encountered": raw_encountered,
+                "filtered_out_count": filtered_out_count,
+                "rejection_breakdown": rejection_breakdown,
+                "coverage_reached": coverage_reached,
                 "raw_filepath": str(raw_filepath),
                 "raw_sha256": raw_sha256,
             },
@@ -202,6 +226,16 @@ def handle_collect_comments(
         print("\n" + "=" * 64)
         print("PENGUMPULAN KOMENTAR SELESAI!")
         print(f"Media ID          : {result.media_id}")
+        if reported_total is not None:
+            tol_info = f" | toleransi min: {tolerance_target}" if tolerance_target is not None else ""
+            print(f"Total Postingan IG: {reported_total}{tol_info}")
+        if raw_encountered > 0:
+            cov_status = "Tercapai" if coverage_reached else "Belum mencapai target toleransi"
+            print(f"Terbaca Halaman   : {raw_encountered} ({cov_status})")
+        print(f"Lolos NLP (CSV)   : {result.unique_collected}")
+        if filtered_out_count > 0:
+            reason_str = ", ".join(f"{k}: {v}" for k, v in sorted(rejection_breakdown.items()))
+            print(f"Ditolak Filter NLP: {filtered_out_count} ({reason_str})")
         print(f"Komentar Diambil  : {result.total_collected}")
         print(f"Komentar Unik     : {result.unique_collected}")
         print(f"Status Kursor     : {'Lengkap (selesai)' if result.paging_completed else 'Mencapai target batas'}")

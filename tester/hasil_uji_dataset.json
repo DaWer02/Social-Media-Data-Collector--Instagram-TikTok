@@ -1,0 +1,901 @@
+{
+  "analysis_id": "uji-dataset-mandiri-001",
+  "source_type": "demo",
+  "is_partial": true,
+  "items_seen": 496,
+  "comments_collected": 496,
+  "comments_valid": 496,
+  "comments_analyzed": 200,
+  "excluded_count": 0,
+  "excluded_reasons": {},
+  "quality_label": "sedang",
+  "limitations": [
+    "Sampel merupakan dataset demonstrasi, bukan komentar dari postingan langsung.",
+    "Sampel komentar bersifat parsial dan hanya mencakup komentar yang dapat diakses saat pengambilan.",
+    "Analisis dibatasi pada 200 komentar valid pertama sesuai urutan pengambilan."
+  ],
+  "detection": {
+    "risk_score": 1,
+    "risk_category": "low",
+    "confidence_label": "sedang",
+    "scoring_version": "heuristic_0.1",
+    "embedding_model_version": "deterministic_ngram_uji_0.1",
+    "clustering_version": "dbscan_0.1",
+    "available_signals": [
+      "semantic_concentration",
+      "duplicate_ratio",
+      "temporal_burst",
+      "account_repetition"
+    ],
+    "missing_signals": [],
+    "signals": [
+      {
+        "signal_id": "semantic_concentration",
+        "assessment_status": "assessed",
+        "value": 0.02,
+        "unit": "ratio",
+        "evidence_refs": [
+          "evidence_01"
+        ],
+        "explanation": "Terdapat 4 dari 200 komentar yang tergabung dalam 1 kelompok kemiripan narasi."
+      },
+      {
+        "signal_id": "duplicate_ratio",
+        "assessment_status": "assessed",
+        "value": 0.0,
+        "unit": "ratio",
+        "evidence_refs": [],
+        "explanation": "Tidak ditemukan pengulangan teks identik antar komentar yang dianalisis."
+      },
+      {
+        "signal_id": "temporal_burst",
+        "assessment_status": "assessed",
+        "value": 0.0,
+        "unit": "ratio",
+        "evidence_refs": [],
+        "explanation": "Komentar dalam kelompok narasi tersebar lintas waktu tanpa lonjakan dalam jendela 5 menit."
+      },
+      {
+        "signal_id": "account_repetition",
+        "assessment_status": "assessed",
+        "value": 0.0,
+        "unit": "ratio",
+        "evidence_refs": [],
+        "explanation": "Setiap komentar yang memiliki penanda akun berasal dari akun pseudonim yang berbeda."
+      }
+    ],
+    "clusters": [
+      {
+        "cluster_id": "cluster_01",
+        "label": "Kelompok komentar bertema: laaalilaahaillaa, anta, subhanaka",
+        "size": 4,
+        "evidence_refs": [
+          "evidence_01",
+          "evidence_02",
+          "evidence_03"
+        ]
+      }
+    ],
+    "noise_count": 196,
+    "evidence": [
+      {
+        "evidence_ref": "evidence_01",
+        "comment_ref": "tt_7704621498258408200",
+        "text_excerpt": "Laaalilaahaillaa anta subhanaka inni kuntu minadzolimin 😭😭 , semoga orang\" yg dzholim sama bpk jokowi mendapat balasan dr Allah 🥺"
+      },
+      {
+        "evidence_ref": "evidence_02",
+        "comment_ref": "tt_7704636931099460360",
+        "text_excerpt": "Laaalilaahaillaa anta subhanaka inni kuntu minadzolimin 😭😭 , semoga orang\" yg dzholim sama bpk jokowi mendapat balasan dr Allah 🥺 aamiin ya Allah ya rabbal alamiin Kun fayakun 🤲"
+      },
+      {
+        "evidence_ref": "evidence_03",
+        "comment_ref": "tt_7704645543263437589",
+        "text_excerpt": "Laaalilaahaillaa anta subhanaka inni kuntu minadzolimin 😭😭 semoga orang\" yg dholim sama bpk jokowi mendapat balasan dr Allah"
+      }
+    ],
+    "summary": "Indikasi pengulangan pola narasi pada sampel berada pada tingkat rendah (skor indikasi 1/100 dari 200 komentar). Sebagian besar komentar menampilkan ekspresi yang beragam, dan kemiripan kecil yang teramati dapat berasal dari tanggapan publik yang wajar."
+  },
+  "cluster_assignments": [
+    {
+      "comment_ref": "tt_7704626528084214549",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704594977183662869",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704584689159652117",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704627530401563393",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704596259017032454",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704611103149392648",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704597980724691720",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704597906599723784",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704634838515450645",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704587594826679041",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704593819757593350",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704621498258408200",
+      "cluster_ref": "cluster_01"
+    },
+    {
+      "comment_ref": "tt_7704654107668398869",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704647469338198792",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704599514490110726",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704626862026507028",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704614023060456213",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704671187796902708",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704588134587253522",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704600300283888402",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704583482177651477",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704600599816749842",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704597635353428744",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704586245447942930",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704640120716264213",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704597163862508306",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704647372399870741",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704597873422320391",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704647175770948372",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704616029901243154",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704596738816688914",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704593140154516245",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704593731081290503",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704598419847594772",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704586887193527048",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704598542497678081",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704615703757062932",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704585597495018260",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704610076946187029",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704616556102255368",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704636931099460360",
+      "cluster_ref": "cluster_01"
+    },
+    {
+      "comment_ref": "tt_7704645543263437589",
+      "cluster_ref": "cluster_01"
+    },
+    {
+      "comment_ref": "tt_7704612211239863060",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704591746638185236",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704693278507205397",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704646048492700437",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704597471495226164",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704598224195142407",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704658528330777352",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704639669078131464",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704597287784579860",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704601082617643782",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704595462700204821",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704648105823798037",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704594081490076434",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704596839090455316",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704928660693025588",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704943278974386964",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704596687163147014",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704820157679993618",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704615110208029492",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704598162711003911",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704592805159895816",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704585786750731014",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704605574655296277",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704626995367461653",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704625589857387316",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704600551359365896",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704829197538607893",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704932228879172372",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704599809672168199",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704945294161789703",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704634219586781973",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7705183703974609671",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704647758290486037",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704612098017936180",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704627411048596245",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704598064045196084",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7705047328726844180",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7705055706391069458",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704595064023319316",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704652203629740818",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704600004366861077",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704629318038848308",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704599592777007890",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704704427898913544",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704634035070878472",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704599594831004424",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704598553997427477",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704705790196794130",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704596578543715093",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704594816860963591",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704583001628377857",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704641855041012487",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704585746711724806",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704599289838322453",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704593917615293191",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704591379074171669",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704649492889060104",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704583965517480711",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704590911767200530",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704595173229888263",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704618295735255815",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704653146870285108",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704594214977979157",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704656763509244680",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704609227460887314",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704648349961831186",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704585919496061716",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704841673671082804",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704696107158848277",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704742737358324500",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704651199350375169",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704591691310908180",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704585784954979080",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704591706319029000",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704588707769631496",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704591236677993236",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704591144394687240",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704594320187589394",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704600850052236040",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704597660032320274",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704597153297711893",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704648789268792085",
+      "cluster_ref": "cluster_01"
+    },
+    {
+      "comment_ref": "tt_7704641014778053382",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704583600209986325",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704639185312088838",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704628411323269896",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704597988681351937",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704647765620540166",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704652358157075208",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704597766949864200",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704887811073524500",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704645899742888712",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704592289122124562",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704597806284227349",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704651836347892487",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704628712667448084",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704590547641516820",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704583296986743558",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704890209602749192",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704631659643486984",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704631998098785045",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704598082319237896",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704637114478363400",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704636630771057414",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704599324299117333",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704597136461906696",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704597605645124359",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704595379153404692",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704591380224967432",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704674523565228820",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704648004335026965",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704647533508690708",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704636236748686088",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704634913228981044",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7705006163764757249",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704597469058089729",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704638904444093236",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704638978188002056",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704637380637098773",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704636608334611206",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704613329469621010",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704651182388036370",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704706372591698695",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704600612926702342",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704612118909158150",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704687394960851730",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704607493528273684",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704601278198088455",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704599602222564114",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704599385753731841",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704712123650523911",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704734354430690055",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704963246331265844",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704725904911532801",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704946238978769685",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704619153966514996",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704700415505646337",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704597623916118792",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704708654154433301",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704648060483502856",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704643286853944085",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704665193632973575",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704646288055616277",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704658137009373959",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704640460330058516",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704619168537346868",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704618734577713941",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704614058113614613",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704610232185996053",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704609833581282066",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704602581806662407",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704929517613368082",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704651710317626164",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704651928316494600",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704651348697269013",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704655868247900935",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704652358215746325",
+      "cluster_ref": null
+    },
+    {
+      "comment_ref": "tt_7704652870713066247",
+      "cluster_ref": null
+    }
+  ]
+}

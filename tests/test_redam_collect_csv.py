@@ -12,6 +12,7 @@ from unittest.mock import MagicMock, patch
 from src.collectors.base import CollectionResult, CommentRecord
 from src.redam.collect import (
     collect_browser_comments_to_csv,
+    extract_clean_url,
     is_human_verification_required,
     is_login_required,
     wait_for_human_verification,
@@ -29,6 +30,20 @@ class TestRedamCollectCSV(unittest.TestCase):
 
     def tearDown(self) -> None:
         self.temp_dir.cleanup()
+
+    def test_extract_clean_url_strips_account_name_and_captions(self) -> None:
+        """Verify extract_clean_url removes prepended/appended account names and captions."""
+        # 1. Share sheet with account name prepended
+        raw1 = "Presiden Joko Widodo di TikTok https://vt.tiktok.com/ZSjShortLink/ #fyp"
+        self.assertEqual(extract_clean_url(raw1), "https://vt.tiktok.com/ZSjShortLink/")
+
+        # 2. Text with Indonesian share prefix
+        raw2 = "Tonton video @creator di TikTok: https://www.tiktok.com/@creator/video/1234567890."
+        self.assertEqual(extract_clean_url(raw2), "https://www.tiktok.com/@creator/video/1234567890")
+
+        # 3. Clean URL already
+        raw3 = "https://www.instagram.com/p/DeRfCHemNKL/"
+        self.assertEqual(extract_clean_url(raw3), "https://www.instagram.com/p/DeRfCHemNKL/")
 
     def test_is_login_required_detection(self) -> None:
         """Verify login barrier detection for Instagram and TikTok."""
@@ -193,7 +208,7 @@ class TestRedamCollectCSV(unittest.TestCase):
             "source_type",
         ]
         self.assertEqual(list(reader[0].keys()), expected_cols)
-        self.assertEqual(reader[0]["username"], "anwaribrahim_my")
+        self.assertEqual(reader[0]["username"], "")  # Anonymous by default in REDAM
         self.assertEqual(reader[1]["comment_text"], "Mantap sekali PMX!")
 
         # Check companion manifest
@@ -249,7 +264,7 @@ class TestRedamCollectCSV(unittest.TestCase):
             rows = list(csv.DictReader(f))
 
         self.assertEqual(len(rows), 2)
-        self.assertEqual(rows[0]["username"], "toktok_user1")
+        self.assertEqual(rows[0]["username"], "")  # Anonymous by default in REDAM
         self.assertEqual(rows[0]["source_type"], "browser_tiktok")
 
     def test_collect_browser_comments_to_csv_tiktok_network_interception(self) -> None:
@@ -317,6 +332,7 @@ class TestRedamCollectCSV(unittest.TestCase):
             limit=2,
             headless=True,
             sync_playwright_factory=mock_factory,
+            include_usernames=True,
         )
 
         self.assertEqual(result["platform"], "tiktok")
@@ -394,6 +410,7 @@ class TestRedamCollectCSV(unittest.TestCase):
             limit=2,
             headless=True,
             sync_playwright_factory=mock_factory,
+            include_usernames=True,
         )
 
         self.assertEqual(result["total_collected"], 2)
@@ -434,6 +451,39 @@ class TestRedamCollectCSV(unittest.TestCase):
         self.assertEqual(kwargs["target_url"], "https://www.instagram.com/p/DeRfCHemNKL/")
         self.assertEqual(kwargs["limit"], 15)
         self.assertEqual(Path(kwargs["output_csv_path"]).resolve(), csv_path.resolve())
+
+    def test_menu_8_option_2_strips_account_name_from_pasted_link(self) -> None:
+        """Verify Menu 8 option 2 automatically strips prepended account name when link is pasted."""
+        csv_path = self.test_dir / "menu8_clean.csv"
+        mock_collect_result = {
+            "url": "https://vt.tiktok.com/ZSjX12345/",
+            "case_id": "ZSjX12345",
+            "platform": "tiktok",
+            "total_collected": 5,
+            "csv_path": str(csv_path),
+            "manifest_path": None,
+            "status": "completed",
+        }
+
+        # User pastes share sheet text containing account name and hashtags
+        pasted_input = "Presiden Joko Widodo di TikTok https://vt.tiktok.com/ZSjX12345/ #fyp"
+        inputs = iter([
+            "2",             # Option 2
+            pasted_input,    # Raw pasted string with account name
+            "5",             # limit
+            str(csv_path),   # CSV path
+            "0",             # exit menu
+        ])
+
+        with patch("src.redam.collect.collect_browser_comments_to_csv", return_value=mock_collect_result) as mock_fn:
+            exit_code = run_menu(input_fn=lambda _: next(inputs), data_dir=self.test_dir)
+
+        self.assertEqual(exit_code, 0)
+        mock_fn.assert_called_once()
+        args, kwargs = mock_fn.call_args
+        # Target URL must be cleaned strictly to the URL without account name
+        self.assertEqual(kwargs["target_url"], "https://vt.tiktok.com/ZSjX12345/")
+        self.assertFalse(kwargs["include_usernames"])
 
     def test_menu_8_option_2_cancel_on_zero_or_empty(self) -> None:
         """Verify Menu 8 option 2 cancels cleanly when 0 or empty string is entered."""

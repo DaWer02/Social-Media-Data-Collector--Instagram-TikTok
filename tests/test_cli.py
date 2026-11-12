@@ -257,6 +257,86 @@ class TestCLIInterface(unittest.TestCase):
         self.assertIn("Target terpilih: 500 komentar", output)
         mock_collect.assert_called_once()
 
+    @patch("src.cli.AppConfig.from_env")
+    @patch("src.cli.save_raw_comments")
+    @patch("src.cli.update_run_metadata")
+    @patch("src.cli.save_run_metadata")
+    @patch("src.cli.calculate_file_sha256", return_value="deadbeef")
+    @patch("src.collectors.browser_nlp.InstagramBrowserNLPCollector.collect_comments")
+    def test_run_cli_option_1_displays_and_saves_tolerance_coverage(
+        self,
+        mock_collect: MagicMock,
+        _mock_sha: MagicMock,
+        _mock_save_meta: MagicMock,
+        mock_update_meta: MagicMock,
+        mock_save_raw: MagicMock,
+        mock_from_env: MagicMock,
+    ) -> None:
+        """Option 1 persists tolerance, raw coverage, and NLP rejection stats to metadata JSON and terminal."""
+        from src.collectors.base import CollectionResult, CommentRecord
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            raw_path = Path(tmpdir) / "comments_test.csv"
+            raw_path.write_text("id,text\n1,halo\n", encoding="utf-8")
+            mock_save_raw.return_value = raw_path
+            mock_update_meta.return_value = Path(tmpdir) / "run_test.json"
+
+            mock_from_env.return_value = AppConfig(
+                collector_method="browser_nlp",
+                target_comments=3000,
+            )
+
+            mock_collect.return_value = CollectionResult(
+                media_id="DWmCs8KgB5-",
+                comments=[
+                    CommentRecord(
+                        comment_id="dom_1",
+                        media_id="DWmCs8KgB5-",
+                        username="ali",
+                        comment_text="Mantap penjelasannya",
+                        source_type="browser_nlp",
+                    )
+                ],
+                total_collected=1,
+                unique_collected=1,
+                status="completed",
+                paging_completed=True,
+                reported_total=1135,
+                tolerance_target=1125,
+                raw_encountered=1127,
+                filtered_out_count=187,
+                rejection_breakdown={
+                    "no_alphanumeric_content": 140,
+                    "too_short": 32,
+                    "commercial_or_bot_spam": 15,
+                },
+                coverage_reached=True,
+            )
+
+            inputs = iter([
+                "1",
+                "https://www.instagram.com/reel/DWmCs8KgB5-/",
+                "",
+                "n",
+                "0",
+            ])
+
+            with patch("sys.stdout", new=io.StringIO()) as fake_out:
+                exit_code = run_cli(input_fn=lambda _: next(inputs))
+                output = fake_out.getvalue()
+
+        self.assertEqual(exit_code, 0)
+        self.assertIn("Total Postingan IG: 1135 | toleransi min: 1125", output)
+        self.assertIn("Terbaca Halaman   : 1127 (Tercapai)", output)
+        self.assertIn("Ditolak Filter NLP: 187", output)
+
+        saved_updates = mock_update_meta.call_args_list[0].kwargs["updates"]
+        self.assertEqual(saved_updates["reported_total"], 1135)
+        self.assertEqual(saved_updates["tolerance_target"], 1125)
+        self.assertEqual(saved_updates["raw_encountered"], 1127)
+        self.assertEqual(saved_updates["filtered_out_count"], 187)
+        self.assertTrue(saved_updates["coverage_reached"])
+
 
 if __name__ == "__main__":
     unittest.main()
