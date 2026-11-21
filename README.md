@@ -1,6 +1,10 @@
+<div align="center">
+
 # Social Media Data Collector (Instagram & TikTok)
 
-> **Privacy-First Open-Source Comment Harvester for Linguistic Research & NLP Datasets**
+**Privacy-First Open-Source Comment Harvester for Linguistic Research & NLP Datasets**
+
+<br>
 
 [![Python Version](https://img.shields.io/badge/Python-3.10%2B-blue?logo=python&logoColor=white)](https://www.python.org/)
 [![Playwright](https://img.shields.io/badge/Playwright-Browser%20Automation-green?logo=playwright&logoColor=white)](https://playwright.dev/)
@@ -8,6 +12,8 @@
 [![Pandas](https://img.shields.io/badge/Data-Pandas%20%7C%20OpenPyXL-150458?logo=pandas&logoColor=white)](https://pandas.pydata.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Privacy Compliance](https://img.shields.io/badge/Privacy-UU%20PDP%20%26%20GDPR%20Ready-brightgreen)](https://github.com/)
+
+</div>
 
 Alat penarikan data (*data collector / comment harvester*) berbasis peramban otomatis (*browser automation*) untuk mengumpulkan komentar publik dari platform **Instagram** (Post & Reels) dan **TikTok** (Video & tautan pendek `vt.tiktok.com`).
 
