@@ -2,13 +2,37 @@
 
 > **Privacy-First Open-Source Comment Harvester for Linguistic Research & NLP Datasets**
 
+[![Python Version](https://img.shields.io/badge/Python-3.10%2B-blue?logo=python&logoColor=white)](https://www.python.org/)
+[![Playwright](https://img.shields.io/badge/Playwright-Browser%20Automation-green?logo=playwright&logoColor=white)](https://playwright.dev/)
+[![Chromium](https://img.shields.io/badge/Engine-Chromium-red?logo=googlechrome&logoColor=white)](https://www.chromium.org/)
+[![Pandas](https://img.shields.io/badge/Data-Pandas%20%7C%20OpenPyXL-150458?logo=pandas&logoColor=white)](https://pandas.pydata.org/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Privacy Compliance](https://img.shields.io/badge/Privacy-UU%20PDP%20%26%20GDPR%20Ready-brightgreen)](https://github.com/)
+
 Alat penarikan data (*data collector / comment harvester*) berbasis peramban otomatis (*browser automation*) untuk mengumpulkan komentar publik dari platform **Instagram** (Post & Reels) dan **TikTok** (Video & tautan pendek `vt.tiktok.com`).
 
 Dirancang khusus dengan standar **Privacy by Design** yang mematuhi prinsip etika pengumpulan data dan perlindungan data pribadi (UU PDP Indonesia & GDPR):
 * **Peniadaan Nama Akun**: File dataset hasil penarikan tidak mencantumkan nama akun/username pembuat komentar.
 * **Sanitasi Mention**: Setiap pola `@nama_orang` di dalam teks komentar disanitasi menjadi `[@USER]`.
 * **Masking PII**: Email dan nomor telepon yang tercantum dalam komentar otomatis disamarkan.
-* **Format Ganda**: Data langsung disimpan dalam bentuk **CSV** (UTF-8 with BOM) dan **Excel (.xlsx)**.
+* **Format Ganda**: Data langsung disimpan dalam bentuk **CSV** (UTF-8) dan **Excel (.xlsx)**.
+
+---
+
+## 🛠️ Teknologi yang Digunakan (*Tech Stack*)
+
+Proyek ini dibangun menggunakan teknologi dan pustaka modern untuk menjamin performa penarikan data yang stabil, tahan terhadap perubahan antarmuka platform, serta kepatuhan privasi yang ketat:
+
+| Teknologi / Pustaka | Versi | Peran & Fungsi Utama |
+| :--- | :--- | :--- |
+| **Python** | `3.10+` | Bahasa pemrograman utama untuk logika inti, CLI interaktif, dan arsitektur pengumpulan data. |
+| **Playwright** | `>=1.40.0` | Otomasi peramban web (*headless & headful*) untuk mengeksekusi scrolling dinamis, *event network interception*, dan ekspansi balasan komentar (*replies*). |
+| **Chromium Engine** | *Bundled Playwright* | Mesin peramban untuk merender JavaScript kompleks, menangani verifikasi keamanan/CAPTCHA interaktif, dan menyimpan sesi profil lokal. |
+| **Pandas** | `>=2.0.0` | Pemrosesan data tabular, deduplikasi komentar secara efisien, dan konversi format dataset. |
+| **OpenPyXL** | `>=3.1.0` | Mesin serialisasi dan ekspor dataset ke dalam format berkas Microsoft Excel (`.xlsx`). |
+| **Python-Dotenv** | `>=1.0.0` | Pengelolaan konfigurasi lingkungan dan variabel *runtime* lokal. |
+| **Regex (Regular Expression)** | *Python Built-in* | Mesin pembersihan teks berbasis pola untuk menyamarkan `@mentions` $\rightarrow$ `[@USER]`, nomor telepon, dan email. |
+| **Pytest** | `>=8.0.0` | Kerangka kerja pengujian unit otomatis (*automated testing*) untuk memastikan keandalan seluruh komponen sistem. |
 
 ---
 
@@ -77,16 +101,25 @@ playwright install chromium
 ## Panduan Penggunaan
 
 ### Mode Interaktif (Menu CLI)
-Jalankan perintah berikut untuk membuka menu navigasi di terminal:
+
+Mode interaktif sangat cocok untuk pengguna yang ingin panduan langkah demi langkah langsung di terminal.
+
+#### 1. Jalankan Program
+Buka terminal (Command Prompt, PowerShell, atau Terminal Linux/macOS) pada folder proyek, lalu jalankan:
 ```bash
 python main.py
 ```
-Menu utama yang tersedia:
+Layar akan menampilkan banner dan menu navigasi:
 ```text
 ================================================================
        SOCIAL MEDIA DATA COLLECTOR (INSTAGRAM & TIKTOK)
        Privacy-First Comment Harvesting for NLP & Research
 ================================================================
+ Target Komentar Default : 300 komentar
+ Kepatuhan Privasi       : AKTIF (Nama Akun Disembunyikan & PII Dimask)
+ Profil Browser Lokal    : .browser_profile
+================================================================
+
 Menu Utama:
   1. Kumpulkan komentar (Instagram / TikTok)
   2. Buka browser untuk login Instagram (Opsional)
@@ -94,7 +127,61 @@ Menu Utama:
   4. Cek status profil browser lokal
   0. Keluar
 ----------------------------------------------------------------
+Pilih menu [0-4]: 
 ```
+
+#### 2. Alur Pengumpulan Komentar (Langkah Demi Langkah Menu 1)
+
+1. **Pilih Menu 1**:
+   Ketik `1` lalu tekan `[Enter]`.
+2. **Masukkan URL Postingan / Video**:
+   Tempel (*paste*) tautan postingan Instagram atau video TikTok yang ingin diambil komentarnya.
+   ```text
+   Masukkan URL postingan atau video (0 untuk batal): https://www.instagram.com/p/DF123abc/
+   ```
+   *Sistem akan otomatis mendeteksi platform (`[TERDETEKSI] Platform: INSTAGRAM` atau `TIKTOK`).*
+3. **Tentukan Jumlah Target Komentar**:
+   Ketik angka jumlah komentar yang ingin diambil (contoh: `500`), atau langsung tekan `[Enter]` untuk menggunakan nilai *default* (300).
+   ```text
+   Jumlah target komentar [Enter: 300]: 500
+   ```
+4. **Pilih Format File Penyimpanan**:
+   Pilih format berkas yang diinginkan:
+   ```text
+   Pilih format penyimpanan:
+     1. Keduanya (CSV & Excel .xlsx) [Default]
+     2. CSV saja
+     3. Excel (.xlsx) saja
+   Pilihan format [1/2/3]: 1
+   ```
+5. **Proses Penarikan Otomatis**:
+   Browser akan terbuka dan otomatis menggulir (*scroll*) halaman serta membuka balasan komentar (*replies*). Terminal menampilkan progres penarikan secara *real-time*:
+   ```text
+   [INFO] + [1/500] Pendapat publik yang sangat menarik...
+   [INFO] + [2/500] [@USER] sepakat sekali dengan narasi ini...
+   ```
+   *(Opsional jika muncul CAPTCHA)*: Jika platform memunculkan teka-teki geser (*puzzle slider*), cukup selesaikan teka-teki di jendela browser, lalu tekan `[Enter]` di terminal untuk melanjutkan pengumpulan otomatis.
+6. **Selesai & File Siap Digunakan**:
+   Setelah target tercapai, terminal menampilkan laporan ringkasan beserta lokasi lengkap file hasil ekspor:
+   ```text
+   ================================================================
+                PENARIKAN DATA SELESAI
+   ================================================================
+    Platform             : INSTAGRAM
+    ID Media/Konten      : DF123abc
+    Total Komentar       : 500
+    Standar Privasi      : Memenuhi UU PDP / GDPR (Tanpa Nama Akun)
+    Berkas CSV           : D:\WEBKU\NLP\data\raw\comments_20261121_220928_b0061e.csv
+    Berkas Excel         : D:\WEBKU\NLP\data\raw\comments_20261121_220928_b0061e.xlsx
+   ================================================================
+   ```
+   Tekan `[Enter]` untuk kembali ke menu utama, atau ketik `0` untuk keluar.
+
+---
+
+#### 3. Menu Lainnya (Bantuan Login & Profil)
+* **Menu 2 & 3 (Login Instagram / TikTok)**: Digunakan jika platform membatasi komentar untuk pengguna non-login. Jendela browser akan terbuka agar Anda dapat login sekali saja. Sesi login akan tersimpan permanen di folder lokal `.browser_profile/` sehingga penarikan selanjutnya tidak perlu login lagi.
+* **Menu 4 (Cek Status Profil)**: Melihat apakah folder sesi browser lokal Anda sudah aktif dan terkonfigurasi dengan aman.
 
 ### Mode Langsung dengan Argumen (Command-Line)
 Anda juga dapat menjalankan penarikan data secara langsung tanpa masuk ke menu:
@@ -106,7 +193,7 @@ python main.py --url "https://www.instagram.com/p/ABC123xyz/" --limit 300 --form
 
 **Penarikan Komentar TikTok:**
 ```bash
-python main.py --url "https://vt.tiktok.com/ZSxyz123/" --limit 500 --format csv
+python main.py --url "https://vt.tiktok.com/ZSxyz123/" --limit 500 --format both
 ```
 
 **Buka Browser untuk Login Sekali (Sesi Tersimpan Lokal):**
@@ -136,7 +223,7 @@ Kolom data yang dihasilkan:
 | `timestamp` | Waktu pembuatan komentar | Format ISO 8601 UTC |
 | `like_count` | Jumlah suka (*likes*) | Metrik publik numerik |
 | `collected_at` | Waktu pengambilan data | Format ISO 8601 UTC |
-| `source_type` | Asal platform koleksi | `browser_instagram` / `browser_tiktok` |
+| `source_type` | Platform asal pengumpulan data | `instagram` / `tiktok` |
 
 > Kolom nama pengguna (`username`, `author`, `user_id`) **TIDAK PERNAH DISIMPAN** demi menjaga privasi pengguna media sosial.
 
