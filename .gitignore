@@ -1,15 +1,23 @@
-# Environment variables
+# =============================================================================
+# .gitignore — Social Media Data Collector (Instagram & TikTok)
+# Privacy-First Open Source Repository
+# =============================================================================
+
+# --- Environment & Secrets ---
 .env
 .env.local
+.env.*
 *.env
 
-# Python virtual environment
+# --- Python Virtual Environments ---
 .venv/
 venv/
 env/
 ENV/
+env.bak/
+venv.bak/
 
-# Python bytecode & cache
+# --- Python Bytecode & Cache ---
 __pycache__/
 *.py[cod]
 *$py.class
@@ -17,10 +25,20 @@ __pycache__/
 .pytest_cache/
 .coverage
 htmlcov/
+.tox/
+.nox/
 
-# Sensitive data directories
+# --- Browser Profiles & Session Storage (Private Credential Protection) ---
 .browser_profile/
 data/.browser_profile/
+chrome_debug.log
+Crashpad/
+playwright-report/
+test-results/
+blob-report/
+*.pma
+
+# --- Data Directories (Strict Privacy: Protect Collected Scraped Data) ---
 data/raw/*
 !data/raw/.gitkeep
 data/processed/*
@@ -29,18 +47,42 @@ data/annotated/*
 !data/annotated/.gitkeep
 data/predictions/*
 !data/predictions/.gitkeep
+data/indonesia/*
+data/malaysia/*
+data/*.xlsx
+data/*.csv
+*.csv
+*.xlsx
+*.parquet
+*.jsonl
+!tests/fixtures/*.csv
 
-# Models & Reports
+# --- Machine Learning Models & Execution Run Logs ---
 models/*
 !models/.gitkeep
 reports/*
 !reports/.gitkeep
-data/redam/
 
-# IDE & OS
+# --- Local User Documents & Analysis Workspace (Kept Local, Not Published) ---
+analyst/
+doc/
+
+# --- Scratch & Ad-hoc Testing ---
+tester/
+scratch/
+
+# --- IDEs & System Files ---
 .vscode/
 .idea/
 *.sublime-project
 *.sublime-workspace
 Thumbs.db
 Desktop.ini
+.DS_Store
+._*
+
+# --- Microsoft Office Temporary Lock Files ---
+~$*.xlsx
+~$*.docx
+~$*.pptx
+~$*.doc

@@ -654,11 +654,10 @@ class InstagramBrowserNLPCollector(BaseCollector):
             comments_dict[rec.comment_id] = rec
 
             curr_count = len(comments_dict)
-            user_tag = f"@{rec.username}: " if rec.username else ""
             preview = rec.comment_text.replace("\n", " ").strip()
             if len(preview) > 50:
                 preview = preview[:47] + "..."
-            print(f"[INFO] + [{curr_count}/{limit}] {user_tag}{preview}")
+            print(f"[INFO] + [{curr_count}/{limit}] {preview}")
 
             if progress_callback:
                 progress_callback(curr_count, limit)

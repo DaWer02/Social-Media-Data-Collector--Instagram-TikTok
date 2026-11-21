@@ -1,4 +1,10 @@
-"""Storage module for managing datasets, run metadata, and ensuring RAW immutability."""
+"""Storage module for managing datasets, run metadata, and ensuring privacy & immutability.
+
+Strict privacy rules:
+- Author usernames and account identities are NEVER stored in exported datasets.
+- Mentions in comments are sanitized to [@USER].
+- Supports both CSV and Excel (.xlsx) formats.
+"""
 
 from __future__ import annotations
 
@@ -6,9 +12,12 @@ import csv
 import datetime
 import hashlib
 import json
+import re
 import uuid
 from pathlib import Path
 from typing import Any, Sequence
+
+import pandas as pd
 
 from src.collectors.base import CommentRecord
 from src.config import (
@@ -17,11 +26,11 @@ from src.config import (
     REPORTS_DIR,
     ensure_directories,
 )
+from src.privacy import sanitize_comment_text
 
 RAW_FIELDNAMES: list[str] = [
     "comment_id",
     "media_id",
-    "username",
     "comment_text",
     "timestamp",
     "like_count",
@@ -37,14 +46,16 @@ def generate_run_id() -> str:
     return f"{timestamp}_{short_uid}"
 
 
-def get_raw_filepath(run_id: str) -> Path:
-    """Get the target Path for a RAW comments CSV file."""
-    return RAW_DATA_DIR / f"comments_{run_id}.csv"
+def get_raw_filepath(run_id: str, extension: str = "csv") -> Path:
+    """Get the target Path for a RAW comments dataset file."""
+    ext = extension.lstrip(".")
+    return RAW_DATA_DIR / f"comments_{run_id}.{ext}"
 
 
-def get_processed_filepath(run_id: str) -> Path:
-    """Get the target Path for a processed clean comments CSV file."""
-    return PROCESSED_DATA_DIR / f"comments_clean_{run_id}.csv"
+def get_processed_filepath(run_id: str, extension: str = "csv") -> Path:
+    """Get the target Path for a processed clean comments dataset file."""
+    ext = extension.lstrip(".")
+    return PROCESSED_DATA_DIR / f"comments_clean_{run_id}.{ext}"
 
 
 def get_run_metadata_filepath(run_id: str) -> Path:
@@ -75,61 +86,100 @@ def _sanitize_metadata_dict(data: dict[str, Any]) -> dict[str, Any]:
     return sanitized
 
 
+def prepare_rows_for_export(
+    comments: Sequence[CommentRecord | dict[str, Any]]
+) -> list[dict[str, Any]]:
+    """Convert comment records to privacy-compliant dictionaries."""
+    rows: list[dict[str, Any]] = []
+    for comment in comments:
+        if isinstance(comment, CommentRecord):
+            raw_txt = comment.comment_text
+            row = {
+                "comment_id": comment.comment_id,
+                "media_id": comment.media_id,
+                "comment_text": sanitize_comment_text(raw_txt),
+                "timestamp": comment.timestamp or "",
+                "like_count": comment.like_count if comment.like_count is not None else 0,
+                "collected_at": comment.collected_at or "",
+                "source_type": comment.source_type,
+            }
+        elif isinstance(comment, dict):
+            raw_txt = str(comment.get("comment_text", ""))
+            row = {
+                "comment_id": str(comment.get("comment_id", "")),
+                "media_id": str(comment.get("media_id", "")),
+                "comment_text": sanitize_comment_text(raw_txt),
+                "timestamp": comment.get("timestamp") or "",
+                "like_count": comment.get("like_count", 0),
+                "collected_at": comment.get("collected_at") or datetime.datetime.now().isoformat(),
+                "source_type": comment.get("source_type", "social_scraper"),
+            }
+        else:
+            continue
+
+        # Double check: username must never be present
+        row.pop("username", None)
+        row.pop("author", None)
+        rows.append(row)
+    return rows
+
+
 def save_raw_comments(
     run_id: str,
     comments: Sequence[CommentRecord | dict[str, Any]],
+    output_format: str = "both",
 ) -> Path:
-    """Save collected comments to a new RAW CSV file.
+    """Save collected comments to RAW dataset file(s) (CSV, Excel, or Both).
 
-    Guarantees immutability: will fail if the file already exists,
-    ensures strictly minimal fields, and never persists sensitive tokens or usernames.
+    Guarantees privacy:
+    - Never persists usernames or account handles.
+    - Sanitizes @mentions into [@USER].
 
     Args:
         run_id: Unique run identifier.
         comments: Sequence of CommentRecord objects or dictionaries.
+        output_format: "csv", "xlsx", or "both" (default).
 
     Returns:
-        Path: The absolute path of the created RAW CSV file.
-
-    Raises:
-        FileExistsError: If a file with this run_id already exists.
+        Path: The primary created dataset file path.
     """
     ensure_directories()
-    raw_path = get_raw_filepath(run_id)
+    rows = prepare_rows_for_export(comments)
 
-    if raw_path.exists():
-        raise FileExistsError(
-            f"RAW dataset '{raw_path}' sudah ada. File RAW bersifat immutable dan tidak boleh ditimpa."
-        )
+    save_csv = output_format.lower() in {"csv", "both"}
+    save_xlsx = output_format.lower() in {"xlsx", "excel", "both"}
 
-    with open(raw_path, "w", newline="", encoding="utf-8") as csvfile:
-        writer = csv.DictWriter(
-            csvfile,
-            fieldnames=RAW_FIELDNAMES,
-            extrasaction="ignore",
-        )
-        writer.writeheader()
+    primary_path: Path | None = None
 
-        for comment in comments:
-            if isinstance(comment, CommentRecord):
-                row = comment.to_dict()
-            elif isinstance(comment, dict):
-                row = {
-                    "comment_id": str(comment.get("comment_id", "")),
-                    "media_id": str(comment.get("media_id", "")),
-                    "username": str(comment.get("username", "")),
-                    "comment_text": str(comment.get("comment_text", "")),
-                    "timestamp": comment.get("timestamp") or "",
-                    "like_count": comment.get("like_count", 0),
-                    "collected_at": comment.get("collected_at") or datetime.datetime.now().isoformat(),
-                    "source_type": comment.get("source_type", "authorized_api"),
-                }
-            else:
-                continue
+    # 1. Save CSV
+    if save_csv:
+        csv_path = get_raw_filepath(run_id, "csv")
+        if csv_path.exists():
+            raise FileExistsError(f"RAW CSV '{csv_path}' sudah ada.")
 
-            writer.writerow(row)
+        with open(csv_path, "w", newline="", encoding="utf-8") as csvfile:
+            writer = csv.DictWriter(
+                csvfile,
+                fieldnames=RAW_FIELDNAMES,
+                extrasaction="ignore",
+            )
+            writer.writeheader()
+            for row in rows:
+                writer.writerow(row)
+        primary_path = csv_path
 
-    return raw_path
+    # 2. Save Excel (.xlsx)
+    if save_xlsx:
+        xlsx_path = get_raw_filepath(run_id, "xlsx")
+        if xlsx_path.exists():
+            raise FileExistsError(f"RAW Excel '{xlsx_path}' sudah ada.")
+
+        df = pd.DataFrame(rows, columns=RAW_FIELDNAMES)
+        df.to_excel(xlsx_path, index=False, engine="openpyxl")
+        if not primary_path:
+            primary_path = xlsx_path
+
+    return primary_path or get_raw_filepath(run_id, "csv")
 
 
 def save_run_metadata(

@@ -24,7 +24,6 @@ REQUIRED_RAW_COLUMNS: list[str] = ["comment_id", "media_id", "comment_text"]
 PROCESSED_FIELDNAMES: list[str] = [
     "comment_id",
     "media_id",
-    "username",
     "comment_text",
     "clean_text",
     "normalized_text",
@@ -37,6 +36,8 @@ PROCESSED_FIELDNAMES: list[str] = [
 
 # Regex pattern for web URLs
 URL_PATTERN = re.compile(r"https?://\S+|www\.\S+", re.IGNORECASE)
+# Regex pattern for account mentions (@username) - masked for privacy (GDPR / PII)
+MENTION_PATTERN = re.compile(r"@[A-Za-z0-9_.]+")
 
 
 class PreprocessingValidationError(ValueError):
@@ -111,10 +112,13 @@ def clean_comment_text(text: str | None) -> str:
     # 1. Replace web URLs with [URL] token
     without_urls = URL_PATTERN.sub("[URL]", raw_str)
 
-    # 2. Normalize whitespace (tabs, newlines, multiple spaces) to a single space
-    normalized_spaces = re.sub(r"\s+", " ", without_urls)
+    # 2. Mask account mentions with [@USER] token for privacy (PII)
+    without_mentions = MENTION_PATTERN.sub("[@USER]", without_urls)
 
-    # 3. Strip leading and trailing whitespace
+    # 3. Normalize whitespace (tabs, newlines, multiple spaces) to a single space
+    normalized_spaces = re.sub(r"\s+", " ", without_mentions)
+
+    # 4. Strip leading and trailing whitespace
     return normalized_spaces.strip()
 
 
@@ -211,8 +215,8 @@ def preprocess_dataset_with_report(
             cid = row.get("comment_id", "").strip()
             raw_text = row.get("comment_text", "")
             media_id = row.get("media_id", "").strip()
-            username = row.get("username", "").strip()
 
+            masked_raw_text = MENTION_PATTERN.sub("[@USER]", raw_text)
             clean_text = clean_comment_text(raw_text)
             norm_text = normalize_text_for_analysis(raw_text)
             is_empty = len(clean_text) == 0
@@ -243,8 +247,7 @@ def preprocess_dataset_with_report(
                 {
                     "comment_id": cid,
                     "media_id": media_id,
-                    "username": username,
-                    "comment_text": raw_text,  # Untouched original text
+                    "comment_text": masked_raw_text,  # Account mentions masked for privacy
                     "clean_text": clean_text,
                     "normalized_text": norm_text,
                     "is_empty_after_cleaning": str(is_empty).lower(),

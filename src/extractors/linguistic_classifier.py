@@ -148,7 +148,7 @@ KONATIF_WORDS: frozenset[str] = frozenset({
     "kapan", "gimana", "bagaimana", "sape",
 })
 
-RE_MENTION = re.compile(r"@([a-zA-Z0-9_.]+)")
+RE_MENTION = re.compile(r"@([a-zA-Z0-9_.]+)|\[@USER\]", re.IGNORECASE)
 RE_QUESTION_MARK = re.compile(r"\?+")
 RE_CALL_TO_ACTION_PHRASES = re.compile(
     r"\b(?:sepenggal\s+lagi|pinjam\s+pm|nih\s+liat|cek\s+link|bantu\s+share|jangan\s+main)\b",
@@ -185,8 +185,8 @@ def extract_clean_tokens(text: str) -> list[str]:
     """Tokenize text into lowercase alphanumeric words, stripping URLs and symbols."""
     if not text:
         return []
-    # Replace URLs with blank
-    clean_str = re.sub(r"https?://\S+|www\.\S+|\[URL\]", " ", text, flags=re.IGNORECASE)
+    # Replace URLs and masked user tokens with blank
+    clean_str = re.sub(r"https?://\S+|www\.\S+|\[URL\]|\[@USER\]", " ", text, flags=re.IGNORECASE)
     # Extract words
     return re.findall(r"\b[a-zA-Z0-9_-]+\b", clean_str.lower())
 

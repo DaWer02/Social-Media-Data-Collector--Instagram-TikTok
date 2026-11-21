@@ -194,11 +194,10 @@ class TestPreprocessingModule(unittest.TestCase):
             reader = csv.DictReader(f)
             row = next(reader)
 
-        # Fieldnames verification
+        # Fieldnames verification: username column omitted for privacy
         expected_fields = [
             "comment_id",
             "media_id",
-            "username",
             "comment_text",
             "clean_text",
             "normalized_text",
@@ -210,18 +209,18 @@ class TestPreprocessingModule(unittest.TestCase):
         ]
         self.assertEqual(list(row.keys()), expected_fields)
 
-        # comment_text must be 100% untouched
+        # comment_text has mentions masked and whitespace preserved
         self.assertEqual(row["comment_text"], raw_text_original)
         # clean_text has normalized whitespace but original casing
         self.assertEqual(row["clean_text"], "Ini Teks ASLI Dengan Huruf BESAR dan Spasi")
         # normalized_text is lowercased
         self.assertEqual(row["normalized_text"], "ini teks asli dengan huruf besar dan spasi")
 
-    def test_username_field_preservation(self) -> None:
-        """Verify username field from RAW CSV is correctly propagated into processed CSV."""
+    def test_privacy_account_removal_and_mention_masking(self) -> None:
+        """Verify username column is omitted and account mentions are masked to [@USER] for privacy."""
         rows = [
-            {"comment_id": "c301", "media_id": "m1", "username": "anwar_ibrahim", "comment_text": "Hebat sekali!"},
-            {"comment_id": "c302", "media_id": "m1", "username": "rakyat_jelata", "comment_text": "Setuju bgt mantap"},
+            {"comment_id": "c301", "media_id": "m1", "username": "anwar_ibrahim", "comment_text": "Hebat sekali @anwar_ibrahim!"},
+            {"comment_id": "c302", "media_id": "m1", "username": "rakyat_jelata", "comment_text": "Setuju bgt mantap @menteri_keuangan"},
         ]
         self._create_raw_sample(rows, fieldnames=["comment_id", "media_id", "username", "comment_text"])
 
@@ -234,8 +233,14 @@ class TestPreprocessingModule(unittest.TestCase):
             reader = list(csv.DictReader(f))
 
         self.assertEqual(len(reader), 2)
-        self.assertEqual(reader[0]["username"], "anwar_ibrahim")
-        self.assertEqual(reader[1]["username"], "rakyat_jelata")
+        # Ensure 'username' column is not present in processed dataset
+        self.assertNotIn("username", reader[0])
+        # Ensure account mentions in comments are masked
+        self.assertIn("[@USER]", reader[0]["comment_text"])
+        self.assertNotIn("@anwar_ibrahim", reader[0]["comment_text"])
+        self.assertIn("[@USER]", reader[0]["clean_text"])
+        self.assertNotIn("@anwar_ibrahim", reader[0]["clean_text"])
+        self.assertIn("[@user]", reader[0]["normalized_text"])
 
     def test_linguistic_categorization_in_preprocessing(self) -> None:
         """Verify NLP categorization is performed directly during preprocessing with category statistics."""

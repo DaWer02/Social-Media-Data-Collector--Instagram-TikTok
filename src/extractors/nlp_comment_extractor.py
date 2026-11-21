@@ -271,6 +271,9 @@ class NLPCommentExtractor:
         clean_text = RE_LEADING_EDITED.sub("", clean_text).strip()
         clean_text = RE_TRAILING_TIMESTAMP_NOISE.sub("", clean_text).strip()
 
+        # Mask account mentions with [@USER] for privacy
+        clean_text = re.sub(r"@[A-Za-z0-9_.]+", "[@USER]", clean_text).strip()
+
         # Rule 1: Minimum text length
         if len(clean_text) < self.min_text_length:
             return ExtractedComment(
